@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Backdrop, CircularProgress, createStyles, makeStyles, Paper, Typography, Theme } from '@material-ui/core';
+import { Backdrop, CircularProgress, createStyles, makeStyles, Paper, Typography } from '@material-ui/core';
 import './App.css';
 import { resetForm, Step1, Step2, Step3, StepPage } from './component';
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles((theme) =>
     createStyles({
         backdrop: {
             zIndex: theme.zIndex.snackbar + 1,

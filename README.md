@@ -6,6 +6,8 @@ Component created to validate individual steps that have invalid fields
 
 ![](preview.jpg)
 
+Example CodeSandbox [here](https://codesandbox.io/s/stepper-material-ui-validation-bgzkh)
+
 ## Frameworks
 To learn Material-UI, check out the [Material-UI](https://material-ui.com/pt/).
 

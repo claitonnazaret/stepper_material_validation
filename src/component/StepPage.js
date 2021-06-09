@@ -1,9 +1,18 @@
-import React, { FC, isValidElement, useEffect, useState } from 'react';
-import { Button, Icon, MobileStepper, Paper, Step, StepLabel, Stepper, useTheme } from '@material-ui/core';
+import React, { FC, useState } from 'react';
+import {
+    Button,
+    createStyles,
+    Icon,
+    makeStyles,
+    MobileStepper,
+    Paper,
+    Step,
+    StepLabel,
+    Stepper,
+    useTheme,
+} from '@material-ui/core';
 import { SpeedDial, SpeedDialAction, SpeedDialIcon } from '@material-ui/lab';
-import { Form, FormProps, useForm } from 'react-final-form';
-import { instanceOf } from 'prop-types';
-import { useStyles } from './style';
+import { Form, FormProps } from 'react-final-form';
 
 type Action = {
     icon: any,
@@ -20,6 +29,30 @@ interface StepPageProps {
     validSchema: any;
     onSubmit: () => any;
 }
+
+const useStyles = makeStyles((theme) =>
+    createStyles({
+        button: {
+            marginTop: theme.spacing(1),
+            marginRight: theme.spacing(1),
+        },
+        stepLabel: {
+            width: '100%',
+            textAlign: 'center',
+        },
+        speedDial: {
+            position: 'absolute',
+            '&.MuiSpeedDial-directionUp, &.MuiSpeedDial-directionLeft': {
+                bottom: theme.spacing(2),
+                right: theme.spacing(2),
+            },
+            '&.MuiSpeedDial-directionDown, &.MuiSpeedDial-directionRight': {
+                top: theme.spacing(2),
+                left: theme.spacing(2),
+            },
+        },
+    }),
+);
 
 export const resetForm = (form: FormProps, initialValues) => {
     Object.keys(initialValues).map((k) => form.resetFieldState(k));
