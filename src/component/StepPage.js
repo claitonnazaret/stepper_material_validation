@@ -1,54 +1,35 @@
-import React, { useState } from 'react';
-import {
-    Button,
-    createStyles,
-    Icon,
-    makeStyles,
-    MobileStepper,
-    Paper,
-    Step,
-    StepLabel,
-    Stepper,
-    useTheme,
-    Theme,
-} from '@material-ui/core';
+import React, { FC, isValidElement, useEffect, useState } from 'react';
+import { Button, Icon, MobileStepper, Paper, Step, StepLabel, Stepper, useTheme } from '@material-ui/core';
 import { SpeedDial, SpeedDialAction, SpeedDialIcon } from '@material-ui/lab';
-import { Form } from 'react-final-form';
-import { Step1, Step2, Step3 } from './Steps';
+import { Form, FormProps, useForm } from 'react-final-form';
+import { instanceOf } from 'prop-types';
+import { useStyles } from './style';
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        button: {
-            marginTop: theme.spacing(1),
-            marginRight: theme.spacing(1),
-        },
-        stepLabel: {
-            width: '100%',
-            textAlign: 'center',
-        },
-        speedDial: {
-            position: 'absolute',
-            '&.MuiSpeedDial-directionUp, &.MuiSpeedDial-directionLeft': {
-                bottom: theme.spacing(2),
-                right: theme.spacing(2),
-            },
-            '&.MuiSpeedDial-directionDown, &.MuiSpeedDial-directionRight': {
-                top: theme.spacing(2),
-                left: theme.spacing(2),
-            },
-        },
-    }),
-);
-const StepPage = () => {
+type Action = {
+    icon: any,
+    name: string,
+    color: string,
+    action: () => any,
+    disabled: boolean,
+};
+
+interface StepPageProps {
+    initialValues: {};
+    steps: [];
+    actions: Action[];
+    validSchema: any;
+    onSubmit: () => any;
+}
+
+export const resetForm = (form: FormProps, initialValues) => {
+    Object.keys(initialValues).map((k) => form.resetFieldState(k));
+    setTimeout(form.reset);
+};
+
+const StepPage: FC<StepPageProps> = ({ initialValues, steps, actions, validSchema, onSubmit }) => {
     const classes = useStyles();
     const theme = useTheme();
     const [activeStep, setActiveStep] = useState(0);
-
-    const steps = [
-        { id: 0, label: 'Step 1', component: <Step1 /> },
-        { id: 1, label: 'Step 2', component: <Step2 /> },
-        { id: 2, label: 'Step 3', component: <Step3 /> },
-    ];
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -58,31 +39,34 @@ const StepPage = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-    const onSubmit = (form) => {
-        console.log(JSON.stringify(form));
+    const checkCombination = (deck, combinations) => {
+        const t = Object.keys(combinations).map((k) => deck.includes(k));
+        return t.find((s) => s);
     };
 
-    const submitForm = (form) => {
-        form.submit();
-    };
+    const findError = (req, errors) => checkCombination(req, errors);
 
     // Dial functions
     const [openDial, setOpenDial] = useState(false);
 
     return (
         <Paper style={{ padding: 16, margin: 50 }}>
-            <Stepper activeStep={activeStep} alternativeLabel>
-                {steps.map(({ id, label }) => (
-                    <Step key={id}>
-                        <StepLabel className={classes.stepLabel}>{label}</StepLabel>
-                    </Step>
-                ))}
-            </Stepper>
             <Form
                 onSubmit={onSubmit}
-                initialValues={[]}
+                initialValues={initialValues}
+                keepDirtyOnReinitialize={false}
+                validate={validSchema}
                 render={({ handleSubmit, form, submitting, errors }) => (
                     <form onSubmit={handleSubmit} noValidate>
+                        <Stepper activeStep={activeStep} alternativeLabel>
+                            {steps.map(({ id, label, requestFields }) => (
+                                <Step key={id}>
+                                    <StepLabel error={findError(requestFields, errors)} className={classes.stepLabel}>
+                                        {label}
+                                    </StepLabel>
+                                </Step>
+                            ))}
+                        </Stepper>
                         <>
                             {steps.map(({ id, component }) => (
                                 <Paper key={id} hidden={activeStep !== id} elevation={0} style={{ padding: 16 }}>
@@ -93,12 +77,12 @@ const StepPage = () => {
                         <MobileStepper
                             steps={steps.length}
                             position="static"
-                            variant="text"
+                            variant="dots"
                             activeStep={activeStep}
                             nextButton={
                                 <Button
                                     size="small"
-                                    onClick={() => handleNext(errors)}
+                                    onClick={handleNext}
                                     className={classes.button}
                                     disabled={activeStep === steps.length - 1}
                                 >
@@ -132,11 +116,16 @@ const StepPage = () => {
                             open={openDial}
                             direction="up"
                         >
-                            <SpeedDialAction
-                                icon={<Icon style={{ color: '#00c853' }}>save</Icon>}
-                                tooltipTitle="Salvar"
-                                onClick={() => submitForm(form)}
-                            />
+                            {actions &&
+                                actions.map((act) => (
+                                    <SpeedDialAction
+                                        title={act.name}
+                                        key={act.name}
+                                        hidden
+                                        icon={<Icon style={{ color: act.color }}>{act.icon}</Icon>}
+                                        onClick={() => act.action(form, initialValues)}
+                                    />
+                                ))}
                         </SpeedDial>
                     </form>
                 )}
